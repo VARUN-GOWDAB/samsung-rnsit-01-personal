@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Chat Assistant</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset & Base ───────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0a0f1e;
+      --surface:   #111827;
+      --card:      #1a2236;
+      --border:    #2a3a5c;
+      --accent:    #5b8cff;
+      --accent2:   #a78bfa;
+      --text:      #e8edf8;
+      --muted:     #7b8db0;
+      --success:   #34d399;
+      --radius:    14px;
+      --shadow:    0 8px 32px rgba(0,0,0,.45);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Ambient glow blobs ─────────────────────────── */
+    body::before, body::after {
+      content: '';
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: .18;
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::before {
+      width: 600px; height: 600px;
+      background: var(--accent);
+      top: -150px; left: -150px;
+    }
+    body::after {
+      width: 500px; height: 500px;
+      background: var(--accent2);
+      bottom: -100px; right: -100px;
+    }
+
+    /* ── Navigation ─────────────────────────────────── */
+    nav {
+      position: relative; z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.25rem 5%;
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(8px);
+    }
+    .logo {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.35rem; font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      letter-spacing: -.5px;
+    }
+    .nav-links { display: flex; gap: 2rem; }
+    .nav-links a {
+      color: var(--muted); text-decoration: none;
+      font-size: .9rem; font-weight: 500;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    /* ── Hero ───────────────────────────────────────── */
+    .hero {
+      position: relative; z-index: 1;
+      display: flex; flex-direction: column; align-items: center;
+      text-align: center;
+      padding: 6rem 5% 4rem;
+      gap: 1.5rem;
+    }
+    .badge {
+      display: inline-flex; align-items: center; gap: .5rem;
+      padding: .35rem 1rem;
+      background: rgba(91,140,255,.12);
+      border: 1px solid rgba(91,140,255,.3);
+      border-radius: 999px;
+      font-size: .78rem; font-weight: 600; color: var(--accent);
+      letter-spacing: .04em; text-transform: uppercase;
+    }
+    .badge .dot {
+      width: 6px; height: 6px;
+      background: var(--success); border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: .5; transform: scale(1.4); }
+    }
+    h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(2.4rem, 6vw, 4rem);
+      font-weight: 700; line-height: 1.1;
+      max-width: 720px;
+    }
+    h1 span {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero-sub {
+      font-size: 1.1rem; color: var(--muted);
+      max-width: 560px; line-height: 1.7;
+    }
+    .cta-row { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+    .btn-primary {
+      padding: .85rem 2rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff; border: none; border-radius: var(--radius);
+      font-size: .95rem; font-weight: 600; cursor: pointer;
+      box-shadow: 0 4px 20px rgba(91,140,255,.35);
+      transition: transform .15s, box-shadow .15s;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(91,140,255,.45); }
+    .btn-secondary {
+      padding: .85rem 2rem;
+      background: transparent;
+      color: var(--text); border: 1px solid var(--border);
+      border-radius: var(--radius); font-size: .95rem; font-weight: 500;
+      cursor: pointer; transition: border-color .2s, background .2s;
+    }
+    .btn-secondary:hover { border-color: var(--accent); background: rgba(91,140,255,.06); }
+
+    /* ── Feature cards ──────────────────────────────── */
+    .features {
+      position: relative; z-index: 1;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+      padding: 2rem 5% 5rem;
+      max-width: 1100px; margin: 0 auto;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      transition: border-color .2s, transform .2s;
+    }
+    .card:hover { border-color: var(--accent); transform: translateY(-3px); }
+    .card-icon {
+      font-size: 1.7rem; margin-bottom: 1rem;
+      display: block;
+    }
+    .card h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.05rem; font-weight: 600; margin-bottom: .5rem;
+    }
+    .card p { font-size: .88rem; color: var(--muted); line-height: 1.6; }
+
+    /* ── How it works ───────────────────────────────── */
+    .how {
+      position: relative; z-index: 1;
+      text-align: center;
+      padding: 0 5% 6rem;
+      max-width: 1100px; margin: 0 auto;
+    }
+    .section-label {
+      font-size: .78rem; font-weight: 600; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--accent); margin-bottom: .75rem;
+    }
+    .how h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      font-weight: 700; margin-bottom: 2.5rem;
+    }
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+    }
+    .step {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      text-align: left;
+    }
+    .step-num {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2rem; font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: .75rem; display: block;
+    }
+    .step h4 { font-size: .95rem; font-weight: 600; margin-bottom: .4rem; }
+    .step p  { font-size: .83rem; color: var(--muted); line-height: 1.6; }
+
+    /* ── Footer ─────────────────────────────────────── */
+    footer {
+      position: relative; z-index: 1;
+      text-align: center;
+      padding: 1.5rem;
+      border-top: 1px solid var(--border);
+      font-size: .82rem; color: var(--muted);
+    }
+
+    /* ── Chat bubble button ─────────────────────────── */
+    #chat-bubble {
+      position: fixed; bottom: 2rem; right: 2rem; z-index: 100;
+      width: 60px; height: 60px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none; cursor: pointer;
+      box-shadow: 0 6px 24px rgba(91,140,255,.5);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem;
+      transition: transform .2s, box-shadow .2s;
+    }
+    #chat-bubble:hover { transform: scale(1.1); box-shadow: 0 8px 32px rgba(91,140,255,.65); }
+
+    /* ── Chat popup window ──────────────────────────── */
+    #chat-popup {
+      position: fixed; bottom: 5.5rem; right: 2rem; z-index: 99;
+      width: 380px; height: 540px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      transform: scale(.92) translateY(12px);
+      opacity: 0; pointer-events: none;
+      transition: transform .25s cubic-bezier(.34,1.56,.64,1), opacity .2s;
+    }
+    #chat-popup.open {
+      transform: scale(1) translateY(0);
+      opacity: 1; pointer-events: all;
+    }
+
+    /* popup header */
+    .popup-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 1.25rem;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+    }
+    .popup-header-left { display: flex; align-items: center; gap: .75rem; }
+    .avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+    }
+    .popup-title { font-weight: 600; font-size: .95rem; }
+    .popup-status { font-size: .75rem; color: var(--success); display: flex; align-items: center; gap: .3rem; }
+    .popup-status::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--success); display:inline-block; }
+    .popup-actions { display: flex; gap: .5rem; }
+    .icon-btn {
+      background: none; border: none; color: var(--muted);
+      cursor: pointer; font-size: 1rem; padding: .25rem;
+      border-radius: 6px; transition: color .15s, background .15s;
+    }
+    .icon-btn:hover { color: var(--text); background: var(--border); }
+
+    /* messages area */
+    #messages {
+      flex: 1; overflow-y: auto; padding: 1rem;
+      display: flex; flex-direction: column; gap: .75rem;
+      scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+    }
+    .msg {
+      max-width: 82%; padding: .65rem 1rem;
+      border-radius: 16px; font-size: .875rem; line-height: 1.55;
+      animation: fadeUp .2s ease;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .msg.user {
+      align-self: flex-end;
+      background: linear-gradient(135deg, var(--accent), #3b6fd4);
+      color: #fff; border-bottom-right-radius: 4px;
+    }
+    .msg.bot {
+      align-self: flex-start;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 4px;
+    }
+    .typing-indicator {
+      align-self: flex-start;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px; border-bottom-left-radius: 4px;
+      padding: .65rem 1rem;
+      display: flex; gap: 5px; align-items: center;
+    }
+    .typing-indicator span {
+      width: 7px; height: 7px;
+      background: var(--muted); border-radius: 50%;
+      animation: bounce 1.2s infinite;
+    }
+    .typing-indicator span:nth-child(2) { animation-delay: .2s; }
+    .typing-indicator span:nth-child(3) { animation-delay: .4s; }
+    @keyframes bounce {
+      0%,60%,100% { transform: translateY(0); }
+      30%          { transform: translateY(-5px); }
+    }
+
+    /* input row */
+    .input-row {
+      display: flex; gap: .5rem; align-items: flex-end;
+      padding: .75rem 1rem;
+      border-top: 1px solid var(--border);
+      background: var(--card);
+    }
+    #user-input {
+      flex: 1; resize: none;
+      background: var(--surface); color: var(--text);
+      border: 1px solid var(--border); border-radius: 10px;
+      padding: .6rem .85rem; font-size: .875rem; font-family: inherit;
+      line-height: 1.5; max-height: 100px; outline: none;
+      transition: border-color .2s;
+    }
+    #user-input:focus { border-color: var(--accent); }
+    #user-input::placeholder { color: var(--muted); }
+    #send-btn {
+      width: 40px; height: 40px; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none; border-radius: 10px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; transition: transform .15s, opacity .15s;
+    }
+    #send-btn:hover:not(:disabled) { transform: scale(1.08); }
+    #send-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    @media (max-width: 480px) {
+      #chat-popup { width: calc(100vw - 2rem); right: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Navigation ─────────────────────────────────── -->
+<nav>
+  <span class="logo">⚡ AIChatbot</span>
+  <div class="nav-links">
+    <a href="#">Home</a>
+    <a href="#">Features</a>
+    <a href="#">Docs</a>
+  </div>
+</nav>
+
+<!-- ── Hero ───────────────────────────────────────── -->
+<section class="hero">
+  <div class="badge"><span class="dot"></span>Powered by Llama 3.1 via Groq</div>
+  <h1>Your intelligent<br><span>AI assistant</span>,<br>ready to chat</h1>
+  <p class="hero-sub">
+    Ask anything — from code reviews and writing help to research and brainstorming.
+    Fast responses powered by Groq's ultra-low latency inference.
+  </p>
+  <div class="cta-row">
+    <button class="btn-primary" onclick="openChat()">Start chatting →</button>
+    <button class="btn-secondary">Learn more</button>
+  </div>
+</section>
+
+<!-- ── Features ───────────────────────────────────── -->
+<div class="features">
+  <div class="card">
+    <span class="card-icon">⚡</span>
+    <h3>Lightning fast</h3>
+    <p>Groq's LPU inference delivers responses in milliseconds — no waiting, just answers.</p>
+  </div>
+  <div class="card">
+    <span class="card-icon">🧠</span>
+    <h3>Context-aware</h3>
+    <p>Remembers your conversation so follow-up questions always make sense.</p>
+  </div>
+  <div class="card">
+    <span class="card-icon">🔒</span>
+    <h3>Secure sessions</h3>
+    <p>Each session is isolated. Your conversation history is never shared.</p>
+  </div>
+  <div class="card">
+    <span class="card-icon">🌐</span>
+    <h3>Open to all topics</h3>
+    <p>Code, writing, math, research — Llama 3.1 handles a wide range of tasks with ease.</p>
+  </div>
+</div>
+
+<!-- ── How it works ───────────────────────────────── -->
+<div class="how">
+  <p class="section-label">How it works</p>
+  <h2>Three steps to your answer</h2>
+  <div class="steps">
+    <div class="step">
+      <span class="step-num">01</span>
+      <h4>Open the chat</h4>
+      <p>Click the chat button in the bottom-right corner to open the assistant.</p>
+    </div>
+    <div class="step">
+      <span class="step-num">02</span>
+      <h4>Type your question</h4>
+      <p>Ask anything — be as detailed or as brief as you like.</p>
+    </div>
+    <div class="step">
+      <span class="step-num">03</span>
+      <h4>Get your answer</h4>
+      <p>Receive a thoughtful, context-aware reply in seconds.</p>
+    </div>
+  </div>
+</div>
+
+<footer>© 2026 AIChatbot · Built with Flask &amp; Groq</footer>
+
+<!-- ── Chat Bubble ─────────────────────────────────── -->
+<button id="chat-bubble" onclick="toggleChat()" title="Open chat">💬</button>
+
+<!-- ── Chat Popup ─────────────────────────────────── -->
+<div id="chat-popup">
+  <div class="popup-header">
+    <div class="popup-header-left">
+      <div class="avatar">🤖</div>
+      <div>
+        <div class="popup-title">AI Assistant</div>
+        <div class="popup-status">Online</div>
+      </div>
+    </div>
+    <div class="popup-actions">
+      <button class="icon-btn" title="Clear chat" onclick="clearChat()">🗑️</button>
+      <button class="icon-btn" title="Close" onclick="toggleChat()">✕</button>
+    </div>
+  </div>
+
+  <div id="messages">
+    <div class="msg bot">
+      👋 Hi there! I'm your AI assistant powered by Llama 3.1. How can I help you today?
+    </div>
+  </div>
+
+  <div class="input-row">
+    <textarea id="user-input" rows="1" placeholder="Type a message…"></textarea>
+    <button id="send-btn" onclick="sendMessage()" title="Send">➤</button>
+  </div>
+</div>
+
+<script>
+  const popup    = document.getElementById('chat-popup');
+  const input    = document.getElementById('user-input');
+  const sendBtn  = document.getElementById('send-btn');
+  const messages = document.getElementById('messages');
+
+  function openChat()   { popup.classList.add('open'); input.focus(); }
+  function toggleChat() { popup.classList.toggle('open'); if (popup.classList.contains('open')) input.focus(); }
+
+  // Auto-resize textarea
+  input.addEventListener('input', () => {
+    input.style.height = 'auto';
+    input.style.height = Math.min(input.scrollHeight, 100) + 'px';
+  });
+
+  // Send on Enter (Shift+Enter for newline)
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  });
+
+  function addMessage(text, role) {
+    const div = document.createElement('div');
+    div.className = `msg ${role}`;
+    div.textContent = text;
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+    return div;
+  }
+
+  function showTyping() {
+    const t = document.createElement('div');
+    t.className = 'typing-indicator';
+    t.id = 'typing';
+    t.innerHTML = '<span></span><span></span><span></span>';
+    messages.appendChild(t);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  function hideTyping() {
+    const t = document.getElementById('typing');
+    if (t) t.remove();
+  }
+
+  async function sendMessage() {
+    const text = input.value.trim();
+    if (!text) return;
+
+    addMessage(text, 'user');
+    input.value = '';
+    input.style.height = 'auto';
+    sendBtn.disabled = true;
+    showTyping();
+
+    try {
+      const res  = await fetch('/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text })
+      });
+      const data = await res.json();
+      hideTyping();
+      addMessage(data.reply || data.error || 'Something went wrong.', 'bot');
+    } catch {
+      hideTyping();
+      addMessage('⚠️ Could not reach the server. Please try again.', 'bot');
+    } finally {
+      sendBtn.disabled = false;
+      input.focus();
+    }
+  }
+
+  async function clearChat() {
+    await fetch('/reset', { method: 'POST' });
+    messages.innerHTML = '<div class="msg bot">Chat cleared! How can I help you?</div>';
+  }
+</script>
+</body>
+</html>
