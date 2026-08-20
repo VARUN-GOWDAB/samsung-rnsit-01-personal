@@ -117,7 +117,10 @@ Do the following:
    3. Retain rest of the details
 2. Modifications in the plan:
    1. prompts.py is OK
-   2. curriculum.py is OK
+   2. curriculum.py
+        Use Groq client
+        API key -> present in a file
+        Model -> "openai/gpt-oss-120b"
    3. ai_backed.py is OK
    4. ui.py 
       1. Title: Curriculum Designer
