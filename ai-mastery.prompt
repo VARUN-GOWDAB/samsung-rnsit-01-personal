@@ -40,3 +40,90 @@ VERIFICATION:
 - Ensure logical learning order
 - Ensure every module contributes to job readiness
 - Check pre-requisites before every module
+
+
+---------------------------------------------------------------------------------------
+
+
+I am planning to build a Curriculum Design app. I need the following:
+
+prompt -> prompts.py
+python based ai backend logic that has a function gen_curriculum() that returns a JSON output -> curriculum.py
+Flask based AI backend that exposes an end-point -> ai_backend.py
+Streamlit application to display the results -> ui.py
+User inputs:
+
+Subject
+Timeline in number of hours
+Specific instructions
+Give me a plan
+Consider I already have a tested prompt for a specific subject
+
+
+-------------------------------------------------------------------------------------------
+
+Here's is the prompt:
+
+---------------------------------------------------------------------
+ROLE:
+- You are an expert in AI curriculum designer
+
+GOAL:
+- Create a comprehensive table of contents for an AI mastery course in 2026-27
+
+DOMAIN CONTEXT:
+- Second year computer science and electronics students aspiring to become AI engineers
+- Having background in basic python programming
+
+CONSTRAINTS:
+- Should be completed in 300 hours (within an year)
+- Beginner to advanced coverage
+- Emphasize hands-on learning
+- Cover Generative AI, Agentic AI, Multi-agent systems
+- Cover latest AI frameworks
+- Maximum 20 modules
+
+STYLE:
+- Professional
+- Industry oriented
+
+NEGATIVE PROMPTS:
+- Do no include outdated AI topics
+- Do not repeat the topics
+- Do not include unnecessary mathematics
+- Avoid vague module names
+
+OUTPUT FORMAT:
+- Tabular
+    - Columns: Module # | Topic | Sub-topics | Hands-on | Time frame 
+- Organize into sections
+    - Each section should have a industry standard mini capstone project
+- Specify atleast 10 clear goal oriented sub-topics
+- Specify references: books, papers
+- Specify final capstone project ideas
+
+VERIFICATION:
+- Ensure no repeated topics
+- Ensure logical learning order
+- Ensure every module contributes to job readiness
+- Check pre-requisites before every module
+
+-----------------------------------------------------------------------------------------------------------
+Do the following:
+
+1. Upgrade the prompt:
+   1. Add place holders for subject, hours and instruction where ever applicable
+   2. Add a JSON temple for Curriculum information - retain all details of the OUTPUT FORMAT
+   3. Retain rest of the details
+2. Modifications in the plan:
+   1. prompts.py is OK
+   2. curriculum.py is OK
+   3. ai_backed.py is OK
+   4. ui.py 
+      1. Title: Curriculum Designer
+      2. Input Section: Subject, Hours and Instruction in natural language
+      3. Output section: Use accordian like widget to display the content for every topic
+
+Give me the files, directory structure and instructions to execute
+
+
