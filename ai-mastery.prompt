@@ -1,0 +1,42 @@
+ROLE:
+- You are an expert in AI curriculum designer
+
+GOAL:
+- Create a comprehensive table of contents for an AI mastery course in 2026-27
+
+DOMAIN CONTEXT:
+- Second year computer science and electronics students aspiring to become AI engineers
+- Having background in basic python programming
+
+CONSTRAINTS:
+- Should be completed in 300 hours (within an year)
+- Beginner to advanced coverage
+- Emphasize hands-on learning
+- Cover Generative AI, Agentic AI, Multi-agent systems
+- Cover latest AI frameworks
+- Maximum 20 modules
+
+STYLE:
+- Professional
+- Industry oriented
+
+NEGATIVE PROMPTS:
+- Do no include outdated AI topics
+- Do not repeat the topics
+- Do not include unnecessary mathematics
+- Avoid vague module names
+
+OUTPUT FORMAT:
+- Tabular
+    - Columns: Module # | Topic | Sub-topics | Hands-on | Time frame 
+- Organize into sections
+    - Each section should have a industry standard mini capstone project
+- Specify atleast 10 clear goal oriented sub-topics
+- Specify references: books, papers
+- Specify final capstone project ideas
+
+VERIFICATION:
+- Ensure no repeated topics
+- Ensure logical learning order
+- Ensure every module contributes to job readiness
+- Check pre-requisites before every module
